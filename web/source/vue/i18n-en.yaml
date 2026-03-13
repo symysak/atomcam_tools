@@ -300,6 +300,10 @@ WebRTC:
     comment: |
       To output audio, the RTSP Main audio must be set to OPUS.
 
+ONVIF:
+  title: ONVIF
+  tooltip: RTSP Main must be on. Enables ONVIF device discovery for NVR integration (e.g. UniFi Protect).
+
 event:
   tab: Notification
   title: WebHook

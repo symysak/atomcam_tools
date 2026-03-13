@@ -301,6 +301,10 @@ WebRTC:
     comment: |
       音声を出すにはRTSP Mainの音声をOPUSに設定してください。
 
+ONVIF:
+  title: ONVIF
+  tooltip: RTSP Mainをonにする必要があります。ONVIFデバイス検出を有効にしてNVR（UniFi Protectなど）と連携します。
+
 event:
   tab: イベント通知
   webhook:
