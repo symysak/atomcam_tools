@@ -45,10 +45,9 @@ PROFILE_TOKEN=$(echo "$REQUEST" | sed -n 's/.*<[^>]*:\?\(ProfileToken\)[> ]*>\([
 # Generate profile XML block
 generate_profile_main() {
   AUDIO_CONFIG=""
-  if [ "$RTSP_AUDIO0" != "off" ] && [ -n "$RTSP_AUDIO0" ]; then
+  if [ "$RTSP_AUDIO0" != "off" ] && [ -n "$RTSP_AUDIO0" ] && [ "$RTSP_AUDIO0" != "OPUS" ]; then
     AUDIO_ENC="G711"
     [ "$RTSP_AUDIO0" = "AAC" ] && AUDIO_ENC="AAC"
-    [ "$RTSP_AUDIO0" = "OPUS" ] && AUDIO_ENC="G711"
     AUDIO_CONFIG="
         <tt:AudioSourceConfiguration token=\"audio_src_config0\">
           <tt:Name>AudioSource0</tt:Name>
@@ -107,7 +106,7 @@ XMLEOF
 
 generate_profile_sub() {
   AUDIO_CONFIG=""
-  if [ "$RTSP_AUDIO1" != "off" ] && [ -n "$RTSP_AUDIO1" ]; then
+  if [ "$RTSP_AUDIO1" != "off" ] && [ -n "$RTSP_AUDIO1" ] && [ "$RTSP_AUDIO1" != "OPUS" ]; then
     AUDIO_ENC="G711"
     [ "$RTSP_AUDIO1" = "AAC" ] && AUDIO_ENC="AAC"
     AUDIO_CONFIG="
@@ -274,7 +273,11 @@ XMLEOF
     ;;
 
   GetSnapshotUri)
-    SNAPSHOT_URI="http://${IP_ADDR}/cgi-bin/get_jpeg.cgi"
+    SNAPSHOT_AUTH=""
+    if [ "$RTSP_AUTH" = "on" ] && [ -n "$RTSP_USER" ] && [ -n "$RTSP_PASSWD" ]; then
+      SNAPSHOT_AUTH="${RTSP_USER}:${RTSP_PASSWD}@"
+    fi
+    SNAPSHOT_URI="http://${SNAPSHOT_AUTH}${IP_ADDR}/cgi-bin/get_jpeg.cgi"
     cat << XMLEOF
 <?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"

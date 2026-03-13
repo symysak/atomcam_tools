@@ -202,7 +202,7 @@ XMLEOF
             xmlns:tt="http://www.onvif.org/ver10/schema">
   <s:Body>
     <tds:GetNetworkInterfacesResponse>
-      <tds:NetworkInterfaces token="eth0">
+      <tds:NetworkInterfaces token="wlan0">
         <tt:Enabled>true</tt:Enabled>
         <tt:Info>
           <tt:Name>wlan0</tt:Name>

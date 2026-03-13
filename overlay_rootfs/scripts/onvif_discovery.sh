@@ -18,8 +18,10 @@ get_ip() {
 
 get_uuid() {
   HWADDR=$(ifconfig | awk '/HWaddr/ { gsub(/^.*HWaddr */, ""); gsub(/:/, ""); print; exit }')
-  # Generate a stable UUID from MAC address
-  echo "urn:uuid:${HWADDR:0:8}-${HWADDR:8:4}-1000-8000-${HWADDR}"
+  # Generate a stable UUID from MAC address using POSIX-compatible substring extraction
+  PART1=$(echo "$HWADDR" | cut -c1-8)
+  PART2=$(echo "$HWADDR" | cut -c9-12)
+  echo "urn:uuid:${PART1}-${PART2}-1000-8000-${HWADDR}"
 }
 
 send_hello() {
@@ -108,13 +110,13 @@ start_discovery() {
   send_hello
 
   # Listen for WS-Discovery probes on multicast
-  # Use busybox nc to listen for UDP multicast probes
+  # Use busybox nc to listen for UDP probes on the discovery port
+  # The -w timeout ensures nc exits so we can re-listen (busybox nc binds with SO_REUSEADDR)
   while true; do
-    PROBE=$(busybox nc -l -u -p "$DISCOVERY_PORT" -w 5 2>/dev/null)
+    PROBE=$(busybox nc -l -u -p "$DISCOVERY_PORT" -w 3 2>/dev/null)
     if [ -n "$PROBE" ]; then
-      # Check if it's a Probe message for ONVIF devices
+      # Check if it's a Probe message
       IS_PROBE=$(echo "$PROBE" | grep -c "Probe")
-      IS_ONVIF=$(echo "$PROBE" | grep -c -i "NetworkVideoTransmitter\|onvif\|Device")
       if [ "$IS_PROBE" -gt 0 ]; then
         # Extract MessageID for RelatesTo
         MSG_ID=$(echo "$PROBE" | sed -n 's/.*<[^>]*:MessageID[^>]*>\([^<]*\)<.*/\1/p' | head -1)
@@ -125,8 +127,7 @@ start_discovery() {
         if [ -n "$IP_ADDR" ]; then
           echo "$(date +"%Y/%m/%d %H:%M:%S") : ONVIF Probe received, sending ProbeMatch" >> "$LOGFILE"
           RESPONSE=$(generate_probe_match "$MSG_ID")
-          # Send ProbeMatch response via UDP unicast back to the sender
-          # Also send to multicast in case unicast fails
+          # Send ProbeMatch response via UDP to multicast address
           echo "$RESPONSE" | busybox nc -w 1 -u "$MULTICAST_ADDR" "$DISCOVERY_PORT" 2>/dev/null
         fi
       fi
