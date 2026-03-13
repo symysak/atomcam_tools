@@ -1,3 +1,5 @@
+2026/03/13 ONVIFでRTSPストリームを取れるように改造。UniFi Protectの3rd party camとして動作することを確認。 by Yoshiaki Suyama
+
 # atomcam_tools
 
 これはATOMCam/ATOMCam2/AtomSwing/WyzeCamV3の機能を拡張するツールキットです。  
