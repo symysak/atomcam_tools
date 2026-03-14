@@ -32,10 +32,16 @@ get_uuid() {
 
 setup_multicast() {
   IFACE=$(get_iface)
-  # Ensure multicast is enabled on the interface
+  # Enable multicast on the interface
   ifconfig "$IFACE" multicast 2>/dev/null
+  # Accept all multicast frames (critical: without IGMP join, busybox nc won't receive multicast)
+  ifconfig "$IFACE" allmulti 2>/dev/null
+  # Join the WS-Discovery multicast group at the IP level
+  ip maddr add 239.255.255.250 dev "$IFACE" 2>/dev/null
   # Add route for WS-Discovery multicast traffic
   route add -net 239.255.255.250 netmask 255.255.255.255 dev "$IFACE" 2>/dev/null
+  # Disable WiFi power-save to prevent dropping multicast packets
+  iw dev "$IFACE" set power_save off 2>/dev/null
   echo "$(date +"%Y/%m/%d %H:%M:%S") : Multicast setup on $IFACE" >> "$LOGFILE"
 }
 
@@ -155,12 +161,25 @@ start_discovery() {
   sleep 2
   send_hello
 
-  # Main loop: listen for Probes and send periodic Hello
-  # nc -w 5 times out after 5 seconds; Hello is sent every HELLO_INTERVAL cycles (~30s)
-  HELLO_INTERVAL=6
-  HELLO_COUNT=0
+  # Start periodic Hello sender in background (independent of nc behavior)
+  (
+    while true; do
+      sleep 30
+      send_hello
+      # Periodically refresh multicast setup in case interface was reset
+      setup_multicast
+    done
+  ) &
+  HELLO_PID=$!
+
+  # Main loop: listen for Probes
   while true; do
-    PROBE=$(busybox nc -l -u -p "$DISCOVERY_PORT" -w 5 2>/dev/null)
+    # Use timeout as fallback in case busybox nc -w doesn't work properly
+    if command -v timeout >/dev/null 2>&1; then
+      PROBE=$(timeout 10 busybox nc -l -u -p "$DISCOVERY_PORT" 2>/dev/null)
+    else
+      PROBE=$(busybox nc -l -u -p "$DISCOVERY_PORT" -w 10 2>/dev/null)
+    fi
     if [ -n "$PROBE" ]; then
       # Only respond to WS-Discovery Probe (not ProbeMatch or Hello)
       if echo "$PROBE" | grep -q "discovery/Probe" && ! echo "$PROBE" | grep -q "ProbeMatches"; then
@@ -177,13 +196,6 @@ start_discovery() {
         fi
       fi
     fi
-
-    # Send periodic Hello for clients that discover via announcements
-    HELLO_COUNT=$((HELLO_COUNT + 1))
-    if [ "$HELLO_COUNT" -ge "$HELLO_INTERVAL" ]; then
-      send_hello
-      HELLO_COUNT=0
-    fi
   done
 }
 
@@ -195,9 +207,13 @@ stop_discovery() {
     PID=$(cat "$PIDFILE")
     if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
       kill "$PID" 2>/dev/null
-      # Also kill any child nc processes
+      # Also kill any child processes (nc listeners, Hello loop)
       for CPID in $(ps -o pid,ppid 2>/dev/null | awk -v ppid="$PID" '$2==ppid {print $1}'); do
         kill "$CPID" 2>/dev/null
+        # Kill grandchildren (nc spawned by Hello loop)
+        for GCPID in $(ps -o pid,ppid 2>/dev/null | awk -v ppid="$CPID" '$2==ppid {print $1}'); do
+          kill "$GCPID" 2>/dev/null
+        done
       done
     fi
     rm -f "$PIDFILE"

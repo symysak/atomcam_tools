@@ -215,6 +215,123 @@ XMLEOF
 XMLEOF
     ;;
 
+  GetServiceCapabilities)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <tds:GetServiceCapabilitiesResponse>
+      <tds:Capabilities>
+        <tds:Network DHCPv6="false" NTP="1" HostnameFromDHCP="false" Dot11Configuration="false" DynDNS="false" IPVersion6="false" ZeroConfiguration="false" IPFilter="false" />
+        <tds:System DiscoveryBye="true" DiscoveryResolve="false" RemoteDiscovery="false" SystemBackup="false" SystemLogging="false" FirmwareUpgrade="false" HttpFirmwareUpgrade="false" HttpSystemBackup="false" HttpSystemLogging="false" HttpSupportInformation="false" />
+        <tds:Security TLS1.0="false" TLS1.1="false" TLS1.2="false" OnboardKeyGeneration="false" AccessPolicyConfig="false" DefaultAccessPolicy="false" Dot1X="false" RemoteUserHandling="false" X.509Token="false" SAMLToken="false" KerberosToken="false" UsernameToken="false" HttpDigest="false" RELToken="false" />
+      </tds:Capabilities>
+    </tds:GetServiceCapabilitiesResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetDiscoveryMode)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl">
+  <s:Body>
+    <tds:GetDiscoveryModeResponse>
+      <tds:DiscoveryMode>Discoverable</tds:DiscoveryMode>
+    </tds:GetDiscoveryModeResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetHostname)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <tds:GetHostnameResponse>
+      <tds:HostnameInformation>
+        <tt:FromDHCP>false</tt:FromDHCP>
+        <tt:Name>${HOSTNAME}</tt:Name>
+      </tds:HostnameInformation>
+    </tds:GetHostnameResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetDNS)
+    DNS_SERVER=$(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf 2>/dev/null)
+    [ -z "$DNS_SERVER" ] && DNS_SERVER="8.8.8.8"
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <tds:GetDNSResponse>
+      <tds:DNSInformation>
+        <tt:FromDHCP>true</tt:FromDHCP>
+        <tt:DNSManual>
+          <tt:Type>IPv4</tt:Type>
+          <tt:IPv4Address>${DNS_SERVER}</tt:IPv4Address>
+        </tt:DNSManual>
+      </tds:DNSInformation>
+    </tds:GetDNSResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetNetworkProtocols)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <tds:GetNetworkProtocolsResponse>
+      <tds:NetworkProtocols>
+        <tt:Name>HTTP</tt:Name>
+        <tt:Enabled>true</tt:Enabled>
+        <tt:Port>${ONVIF_PORT}</tt:Port>
+      </tds:NetworkProtocols>
+      <tds:NetworkProtocols>
+        <tt:Name>RTSP</tt:Name>
+        <tt:Enabled>true</tt:Enabled>
+        <tt:Port>8554</tt:Port>
+      </tds:NetworkProtocols>
+    </tds:GetNetworkProtocolsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetNetworkDefaultGateway)
+    GATEWAY=$(ip route 2>/dev/null | awk '/default/ {print $3; exit}')
+    [ -z "$GATEWAY" ] && GATEWAY="0.0.0.0"
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <tds:GetNetworkDefaultGatewayResponse>
+      <tds:NetworkGateway>
+        <tt:IPv4Address>${GATEWAY}</tt:IPv4Address>
+      </tds:NetworkGateway>
+    </tds:GetNetworkDefaultGatewayResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
   *)
     # Default: return empty response for unknown actions
     cat << XMLEOF

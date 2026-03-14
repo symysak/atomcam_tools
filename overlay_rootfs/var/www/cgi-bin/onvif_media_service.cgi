@@ -580,6 +580,166 @@ XMLEOF
 XMLEOF
     ;;
 
+  GetServiceCapabilities)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl">
+  <s:Body>
+    <trt:GetServiceCapabilitiesResponse>
+      <trt:Capabilities SnapshotUri="true" Rotation="false" VideoSourceMode="false" OSD="false">
+        <trt:ProfileCapabilities MaximumNumberOfProfiles="2" />
+        <trt:StreamingCapabilities RTPMulticast="false" RTP_TCP="true" RTP_RTSP_TCP="true" NonAggregateControl="false" />
+      </trt:Capabilities>
+    </trt:GetServiceCapabilitiesResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetVideoEncoderConfigurationOptions)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoEncoderConfigurationOptionsResponse>
+      <trt:Options>
+        <tt:QualityRange>
+          <tt:Min>1</tt:Min>
+          <tt:Max>10</tt:Max>
+        </tt:QualityRange>
+        <tt:H264>
+          <tt:ResolutionsAvailable>
+            <tt:Width>1920</tt:Width>
+            <tt:Height>1080</tt:Height>
+          </tt:ResolutionsAvailable>
+          <tt:ResolutionsAvailable>
+            <tt:Width>640</tt:Width>
+            <tt:Height>360</tt:Height>
+          </tt:ResolutionsAvailable>
+          <tt:GovLengthRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>60</tt:Max>
+          </tt:GovLengthRange>
+          <tt:FrameRateRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>25</tt:Max>
+          </tt:FrameRateRange>
+          <tt:EncodingIntervalRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>5</tt:Max>
+          </tt:EncodingIntervalRange>
+          <tt:H264ProfilesSupported>Main</tt:H264ProfilesSupported>
+          <tt:H264ProfilesSupported>High</tt:H264ProfilesSupported>
+        </tt:H264>
+      </trt:Options>
+    </trt:GetVideoEncoderConfigurationOptionsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetVideoSourceConfigurationOptions)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoSourceConfigurationOptionsResponse>
+      <trt:Options>
+        <tt:BoundsRange>
+          <tt:XRange><tt:Min>0</tt:Min><tt:Max>0</tt:Max></tt:XRange>
+          <tt:YRange><tt:Min>0</tt:Min><tt:Max>0</tt:Max></tt:YRange>
+          <tt:WidthRange><tt:Min>640</tt:Min><tt:Max>1920</tt:Max></tt:WidthRange>
+          <tt:HeightRange><tt:Min>360</tt:Min><tt:Max>1080</tt:Max></tt:HeightRange>
+        </tt:BoundsRange>
+        <tt:VideoSourceTokensAvailable>video_src0</tt:VideoSourceTokensAvailable>
+      </trt:Options>
+    </trt:GetVideoSourceConfigurationOptionsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetCompatibleVideoEncoderConfigurations)
+    if [ "$PROFILE_TOKEN" = "sub_stream" ]; then
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetCompatibleVideoEncoderConfigurationsResponse>
+      <trt:Configurations token="video_enc_config1">
+        <tt:Name>VideoEncoder1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>640</tt:Width>
+          <tt:Height>360</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>3</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>512</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address><tt:Type>IPv4</tt:Type><tt:IPv4Address>0.0.0.0</tt:IPv4Address></tt:Address>
+          <tt:Port>0</tt:Port><tt:TTL>0</tt:TTL><tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configurations>
+    </trt:GetCompatibleVideoEncoderConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    else
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetCompatibleVideoEncoderConfigurationsResponse>
+      <trt:Configurations token="video_enc_config0">
+        <tt:Name>VideoEncoder0</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>1920</tt:Width>
+          <tt:Height>1080</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>5</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>2048</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address><tt:Type>IPv4</tt:Type><tt:IPv4Address>0.0.0.0</tt:IPv4Address></tt:Address>
+          <tt:Port>0</tt:Port><tt:TTL>0</tt:TTL><tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configurations>
+    </trt:GetCompatibleVideoEncoderConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    fi
+    ;;
+
   *)
     cat << XMLEOF
 <?xml version="1.0" encoding="UTF-8"?>
