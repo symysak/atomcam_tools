@@ -42,6 +42,10 @@ ACTION=$(echo "$REQUEST" | sed -n 's/.*<[^>]*:\?\(Get[A-Za-z]*\)[> /].*/\1/p' | 
 PROFILE_TOKEN=$(echo "$REQUEST" | sed -n 's/.*<[^>]*:\?\(ProfileToken\)[> ]*>\([^<]*\)<.*/\2/p' | head -1)
 [ -z "$PROFILE_TOKEN" ] && PROFILE_TOKEN=$(echo "$REQUEST" | sed -n 's/.*<\(ProfileToken\)[> ]*>\([^<]*\)<.*/\2/p' | head -1)
 
+# Extract ConfigurationToken for singular Get*Configuration requests
+CONFIG_TOKEN=$(echo "$REQUEST" | sed -n 's/.*<[^>]*:\?\(ConfigurationToken\)[> ]*>\([^<]*\)<.*/\2/p' | head -1)
+[ -z "$CONFIG_TOKEN" ] && CONFIG_TOKEN=$(echo "$REQUEST" | sed -n 's/.*<\(ConfigurationToken\)[> ]*>\([^<]*\)<.*/\2/p' | head -1)
+
 # Generate profile XML block
 generate_profile_main() {
   AUDIO_CONFIG=""
@@ -262,9 +266,15 @@ XMLEOF
     <trt:GetVideoSourceConfigurationsResponse>
       <trt:Configurations token="video_src_config0">
         <tt:Name>VideoSource0</tt:Name>
-        <tt:UseCount>2</tt:UseCount>
+        <tt:UseCount>1</tt:UseCount>
         <tt:SourceToken>video_src0</tt:SourceToken>
         <tt:Bounds x="0" y="0" width="1920" height="1080" />
+      </trt:Configurations>
+      <trt:Configurations token="video_src_config1">
+        <tt:Name>VideoSource1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:SourceToken>video_src0</tt:SourceToken>
+        <tt:Bounds x="0" y="0" width="640" height="360" />
       </trt:Configurations>
     </trt:GetVideoSourceConfigurationsResponse>
   </s:Body>
@@ -384,6 +394,350 @@ XMLEOF
   </s:Body>
 </s:Envelope>
 XMLEOF
+    ;;
+
+  GetVideoSourceConfiguration)
+    if [ "$CONFIG_TOKEN" = "video_src_config1" ]; then
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoSourceConfigurationResponse>
+      <trt:Configuration token="video_src_config1">
+        <tt:Name>VideoSource1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:SourceToken>video_src0</tt:SourceToken>
+        <tt:Bounds x="0" y="0" width="640" height="360" />
+      </trt:Configuration>
+    </trt:GetVideoSourceConfigurationResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    else
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoSourceConfigurationResponse>
+      <trt:Configuration token="video_src_config0">
+        <tt:Name>VideoSource0</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:SourceToken>video_src0</tt:SourceToken>
+        <tt:Bounds x="0" y="0" width="1920" height="1080" />
+      </trt:Configuration>
+    </trt:GetVideoSourceConfigurationResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    fi
+    ;;
+
+  GetVideoEncoderConfiguration)
+    if [ "$CONFIG_TOKEN" = "video_enc_config1" ]; then
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoEncoderConfigurationResponse>
+      <trt:Configuration token="video_enc_config1">
+        <tt:Name>VideoEncoder1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>640</tt:Width>
+          <tt:Height>360</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>3</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>512</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address>
+            <tt:Type>IPv4</tt:Type>
+            <tt:IPv4Address>0.0.0.0</tt:IPv4Address>
+          </tt:Address>
+          <tt:Port>0</tt:Port>
+          <tt:TTL>0</tt:TTL>
+          <tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configuration>
+    </trt:GetVideoEncoderConfigurationResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    else
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoEncoderConfigurationResponse>
+      <trt:Configuration token="video_enc_config0">
+        <tt:Name>VideoEncoder0</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>1920</tt:Width>
+          <tt:Height>1080</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>5</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>2048</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address>
+            <tt:Type>IPv4</tt:Type>
+            <tt:IPv4Address>0.0.0.0</tt:IPv4Address>
+          </tt:Address>
+          <tt:Port>0</tt:Port>
+          <tt:TTL>0</tt:TTL>
+          <tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configuration>
+    </trt:GetVideoEncoderConfigurationResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    fi
+    ;;
+
+  GetAudioSourceConfigurations)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetAudioSourceConfigurationsResponse>
+      <trt:Configurations token="audio_src_config0">
+        <tt:Name>AudioSource0</tt:Name>
+        <tt:UseCount>2</tt:UseCount>
+        <tt:SourceToken>audio_src0</tt:SourceToken>
+      </trt:Configurations>
+    </trt:GetAudioSourceConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetAudioEncoderConfigurations)
+    AUDIO_CONFIGS=""
+    if [ "$RTSP_AUDIO0" != "off" ] && [ -n "$RTSP_AUDIO0" ] && [ "$RTSP_AUDIO0" != "OPUS" ]; then
+      AUDIO_ENC0="G711"
+      [ "$RTSP_AUDIO0" = "AAC" ] && AUDIO_ENC0="AAC"
+      AUDIO_CONFIGS="
+      <trt:Configurations token=\"audio_enc_config0\">
+        <tt:Name>AudioEncoder0</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>${AUDIO_ENC0}</tt:Encoding>
+        <tt:Bitrate>64</tt:Bitrate>
+        <tt:SampleRate>8</tt:SampleRate>
+      </trt:Configurations>"
+    fi
+    if [ "$RTSP_AUDIO1" != "off" ] && [ -n "$RTSP_AUDIO1" ] && [ "$RTSP_AUDIO1" != "OPUS" ]; then
+      AUDIO_ENC1="G711"
+      [ "$RTSP_AUDIO1" = "AAC" ] && AUDIO_ENC1="AAC"
+      AUDIO_CONFIGS="${AUDIO_CONFIGS}
+      <trt:Configurations token=\"audio_enc_config1\">
+        <tt:Name>AudioEncoder1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>${AUDIO_ENC1}</tt:Encoding>
+        <tt:Bitrate>64</tt:Bitrate>
+        <tt:SampleRate>8</tt:SampleRate>
+      </trt:Configurations>"
+    fi
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetAudioEncoderConfigurationsResponse>${AUDIO_CONFIGS}
+    </trt:GetAudioEncoderConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetServiceCapabilities)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl">
+  <s:Body>
+    <trt:GetServiceCapabilitiesResponse>
+      <trt:Capabilities SnapshotUri="true" Rotation="false" VideoSourceMode="false" OSD="false">
+        <trt:ProfileCapabilities MaximumNumberOfProfiles="2" />
+        <trt:StreamingCapabilities RTPMulticast="false" RTP_TCP="true" RTP_RTSP_TCP="true" NonAggregateControl="false" />
+      </trt:Capabilities>
+    </trt:GetServiceCapabilitiesResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetVideoEncoderConfigurationOptions)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoEncoderConfigurationOptionsResponse>
+      <trt:Options>
+        <tt:QualityRange>
+          <tt:Min>1</tt:Min>
+          <tt:Max>10</tt:Max>
+        </tt:QualityRange>
+        <tt:H264>
+          <tt:ResolutionsAvailable>
+            <tt:Width>1920</tt:Width>
+            <tt:Height>1080</tt:Height>
+          </tt:ResolutionsAvailable>
+          <tt:ResolutionsAvailable>
+            <tt:Width>640</tt:Width>
+            <tt:Height>360</tt:Height>
+          </tt:ResolutionsAvailable>
+          <tt:GovLengthRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>60</tt:Max>
+          </tt:GovLengthRange>
+          <tt:FrameRateRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>25</tt:Max>
+          </tt:FrameRateRange>
+          <tt:EncodingIntervalRange>
+            <tt:Min>1</tt:Min>
+            <tt:Max>5</tt:Max>
+          </tt:EncodingIntervalRange>
+          <tt:H264ProfilesSupported>Main</tt:H264ProfilesSupported>
+          <tt:H264ProfilesSupported>High</tt:H264ProfilesSupported>
+        </tt:H264>
+      </trt:Options>
+    </trt:GetVideoEncoderConfigurationOptionsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetVideoSourceConfigurationOptions)
+    cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetVideoSourceConfigurationOptionsResponse>
+      <trt:Options>
+        <tt:BoundsRange>
+          <tt:XRange><tt:Min>0</tt:Min><tt:Max>0</tt:Max></tt:XRange>
+          <tt:YRange><tt:Min>0</tt:Min><tt:Max>0</tt:Max></tt:YRange>
+          <tt:WidthRange><tt:Min>640</tt:Min><tt:Max>1920</tt:Max></tt:WidthRange>
+          <tt:HeightRange><tt:Min>360</tt:Min><tt:Max>1080</tt:Max></tt:HeightRange>
+        </tt:BoundsRange>
+        <tt:VideoSourceTokensAvailable>video_src0</tt:VideoSourceTokensAvailable>
+      </trt:Options>
+    </trt:GetVideoSourceConfigurationOptionsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    ;;
+
+  GetCompatibleVideoEncoderConfigurations)
+    if [ "$PROFILE_TOKEN" = "sub_stream" ]; then
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetCompatibleVideoEncoderConfigurationsResponse>
+      <trt:Configurations token="video_enc_config1">
+        <tt:Name>VideoEncoder1</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>640</tt:Width>
+          <tt:Height>360</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>3</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>512</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address><tt:Type>IPv4</tt:Type><tt:IPv4Address>0.0.0.0</tt:IPv4Address></tt:Address>
+          <tt:Port>0</tt:Port><tt:TTL>0</tt:TTL><tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configurations>
+    </trt:GetCompatibleVideoEncoderConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    else
+      cat << XMLEOF
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+            xmlns:tt="http://www.onvif.org/ver10/schema">
+  <s:Body>
+    <trt:GetCompatibleVideoEncoderConfigurationsResponse>
+      <trt:Configurations token="video_enc_config0">
+        <tt:Name>VideoEncoder0</tt:Name>
+        <tt:UseCount>1</tt:UseCount>
+        <tt:Encoding>H264</tt:Encoding>
+        <tt:Resolution>
+          <tt:Width>1920</tt:Width>
+          <tt:Height>1080</tt:Height>
+        </tt:Resolution>
+        <tt:Quality>5</tt:Quality>
+        <tt:RateControl>
+          <tt:FrameRateLimit>20</tt:FrameRateLimit>
+          <tt:EncodingInterval>1</tt:EncodingInterval>
+          <tt:BitrateLimit>2048</tt:BitrateLimit>
+        </tt:RateControl>
+        <tt:H264>
+          <tt:GovLength>20</tt:GovLength>
+          <tt:H264Profile>Main</tt:H264Profile>
+        </tt:H264>
+        <tt:Multicast>
+          <tt:Address><tt:Type>IPv4</tt:Type><tt:IPv4Address>0.0.0.0</tt:IPv4Address></tt:Address>
+          <tt:Port>0</tt:Port><tt:TTL>0</tt:TTL><tt:AutoStart>false</tt:AutoStart>
+        </tt:Multicast>
+        <tt:SessionTimeout>PT60S</tt:SessionTimeout>
+      </trt:Configurations>
+    </trt:GetCompatibleVideoEncoderConfigurationsResponse>
+  </s:Body>
+</s:Envelope>
+XMLEOF
+    fi
     ;;
 
   *)
