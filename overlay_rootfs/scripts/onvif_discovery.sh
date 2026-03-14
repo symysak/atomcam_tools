@@ -34,7 +34,7 @@ setup_multicast() {
   IFACE=$(get_iface)
   # Enable multicast on the interface
   ifconfig "$IFACE" multicast 2>/dev/null
-  # Accept all multicast frames (critical: without IGMP join, busybox nc won't receive multicast)
+  # Accept all multicast frames (bypasses kernel multicast filter so nc receives packets)
   ifconfig "$IFACE" allmulti 2>/dev/null
   # Join the WS-Discovery multicast group at the IP level
   ip maddr add 239.255.255.250 dev "$IFACE" 2>/dev/null
@@ -181,8 +181,8 @@ start_discovery() {
       PROBE=$(busybox nc -l -u -p "$DISCOVERY_PORT" -w 10 2>/dev/null)
     fi
     if [ -n "$PROBE" ]; then
-      # Only respond to WS-Discovery Probe (not ProbeMatch or Hello)
-      if echo "$PROBE" | grep -q "discovery/Probe" && ! echo "$PROBE" | grep -q "ProbeMatches"; then
+      # Only respond to WS-Discovery Probe (not ProbeMatch, ProbeMatches, or Hello)
+      if echo "$PROBE" | grep -q "discovery/Probe" && ! echo "$PROBE" | grep -iq "ProbeMatch"; then
         # Extract MessageID for RelatesTo
         MSG_ID=$(echo "$PROBE" | sed -n 's/.*<[^>]*:MessageID[^>]*>\([^<]*\)<.*/\1/p' | head -1)
         [ -z "$MSG_ID" ] && MSG_ID=$(echo "$PROBE" | sed -n 's/.*<MessageID[^>]*>\([^<]*\)<.*/\1/p' | head -1)
