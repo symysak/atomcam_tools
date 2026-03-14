@@ -60,7 +60,7 @@ XMLEOF
     <tds:GetCapabilitiesResponse>
       <tds:Capabilities>
         <tt:Device>
-          <tt:XAddr>${SERVICE_ADDR}/cgi-bin/onvif_device_service.cgi</tt:XAddr>
+          <tt:XAddr>${SERVICE_ADDR}/onvif/device_service</tt:XAddr>
           <tt:Network>
             <tt:IPFilter>false</tt:IPFilter>
             <tt:ZeroConfiguration>false</tt:ZeroConfiguration>
@@ -77,7 +77,7 @@ XMLEOF
           </tt:System>
         </tt:Device>
         <tt:Media>
-          <tt:XAddr>${SERVICE_ADDR}/cgi-bin/onvif_media_service.cgi</tt:XAddr>
+          <tt:XAddr>${SERVICE_ADDR}/onvif/media_service</tt:XAddr>
           <tt:StreamingCapabilities>
             <tt:RTPMulticast>false</tt:RTPMulticast>
             <tt:RTP_TCP>true</tt:RTP_TCP>
@@ -100,7 +100,7 @@ XMLEOF
     <tds:GetServicesResponse>
       <tds:Service>
         <tds:Namespace>http://www.onvif.org/ver10/device/wsdl</tds:Namespace>
-        <tds:XAddr>${SERVICE_ADDR}/cgi-bin/onvif_device_service.cgi</tds:XAddr>
+        <tds:XAddr>${SERVICE_ADDR}/onvif/device_service</tds:XAddr>
         <tds:Version>
           <tds:Major>2</tds:Major>
           <tds:Minor>0</tds:Minor>
@@ -108,7 +108,7 @@ XMLEOF
       </tds:Service>
       <tds:Service>
         <tds:Namespace>http://www.onvif.org/ver10/media/wsdl</tds:Namespace>
-        <tds:XAddr>${SERVICE_ADDR}/cgi-bin/onvif_media_service.cgi</tds:XAddr>
+        <tds:XAddr>${SERVICE_ADDR}/onvif/media_service</tds:XAddr>
         <tds:Version>
           <tds:Major>2</tds:Major>
           <tds:Minor>0</tds:Minor>
